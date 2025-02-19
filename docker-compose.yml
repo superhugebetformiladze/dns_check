@@ -1,0 +1,9 @@
+services:
+  dns_checker:
+    build: .
+    container_name: dns_checker
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    restart: unless-stopped

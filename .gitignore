@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Django
+*.log
+*.pot
+*.pyc
+media/
+__pycache__/
+local_settings.py
+db.sqlite3
+
+# React
+node_modules/
+build/
+.DS_Store
+*.log
+.husky
+bundle.js*
+
+# IDE
+.idea/
+.vscode/
+
+# Compiled Python bytecode
+*.pyc
+
+# Compiled C extensions
+*.so
+
+# Django testing
+htmlcov/
+
+# Virtual environment
+venv/
+env/
+.env/
+
+.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# npm
+package-lock.json
+
+*.pem
+
+*.rar

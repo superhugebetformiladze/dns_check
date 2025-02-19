@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS checking</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <canvas id="gradient-canvas"></canvas>
+
+    <div class="container">
+        <div id="controls" class="controls">
+            <input type="number" id="interval" placeholder="Интервал проверки (сек)">
+            <button onclick="updateInterval()">Обновить</button>
+        </div>
+    
+        <div id="output"></div>
+    </div>
+
+
+
+    <script>
+        let ws = new WebSocket("ws://localhost:8000/ws");
+        let output = document.getElementById("output");
+        let intervalInput = document.getElementById("interval");
+        let autoScroll = true;
+        let alertSound = new Audio("/static/audio/alert.mp3");
+
+        function isAtBottom() {
+            return output.scrollHeight - output.clientHeight <= output.scrollTop + 1;
+        }
+
+        output.addEventListener("scroll", function() {
+            autoScroll = isAtBottom();
+        });
+
+        ws.onopen = function() {
+            console.log("WebSocket соединение установлено.");
+            ws.send(JSON.stringify({ type: "get_interval" })); // Запрашиваем текущий интервал
+        };
+
+        ws.onmessage = function(event) {
+            let newData = JSON.parse(event.data);
+
+            if (newData.type === "interval_update") {
+                intervalInput.value = newData.interval; // Обновляем значение поля
+                return;
+            }
+
+            newData.forEach(data => {
+                let site = data.site;
+                let info = data.info;
+                let time = data.time;
+                let status = data.status;
+
+                output.innerHTML += `
+                <div class="info-block">
+                    <div class="info-wrapper">
+                        <span class="info-bold">Сайт: </span>
+                        <span class="info">${site}</span>
+                    </div>
+                    <div class="info-wrapper">
+                        <span class="info-bold">Статус: </span>
+                        <span class="info">${info}</span>
+                    </div>
+                    <div class="info-wrapper">
+                        <span class="info-bold">Время: </span>
+                        <span class="info">${time}</span>
+                    </div>
+                </div>
+                `;
+
+                if (status.includes("unworking")) {
+                    alertSound.play();
+                }
+
+                if (autoScroll) {
+                    output.scrollTop = output.scrollHeight;
+                }
+            });
+        };
+
+        function updateInterval() {
+            let newInterval = parseInt(intervalInput.value);
+            ws.send(JSON.stringify({ type: "update_interval", interval: newInterval }));
+        }
+    </script>
+    <script src="/static/gradient.js"></script>
+</body>
+</html>
