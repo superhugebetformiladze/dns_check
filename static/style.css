@@ -32,17 +32,16 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
-    color: #451770;
 }
 
 .controls input {
     height: 40px;
-    background: rgb(255 255 255 / 26%);
+    background: rgba(99, 99, 99, 0.5);
     border: 1px solid rgb(255 255 255 / 15%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 0 15px;
-    color: #4b4b4b;
+    color: #ffffff;
     border-radius: 8px;
     font-size: 20px;
     font-family: 'Montserrat Bold', sans-serif;
@@ -54,7 +53,7 @@ body {
 }
 
 ::-webkit-input-placeholder {
-    color: #4b4b4b;
+    color: #cccccc;
     font-family: 'Montserrat Regular', sans-serif;
 }
 
@@ -95,6 +94,16 @@ body {
     z-index: 0;
 }
 
+#background {
+    width: 100%;
+    height: 100%;
+    background-image: url("/static/images/working.png");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
 #output {
     width: 100%;
     height: 100%;
@@ -106,17 +115,17 @@ body {
     gap: 2rem;
 
 
-    background: rgb(255 255 255 / 26%);
+    background: rgba(99, 99, 99, 0.5);
     border-radius: 8px;
     border: 1px solid rgb(255 255 255 / 15%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     font-size: 20px;
     font-family: 'Montserrat Regular', sans-serif;
     padding: 30px 40px;
     text-align: center;
     line-height: 1.4;
-    color: #444444;
+    color: #ffffff;
 }
 
 .info-block {

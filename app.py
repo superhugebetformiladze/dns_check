@@ -16,7 +16,7 @@ interval = 2  # Начальный интервал в секундах
 monitor_task = None  # Хранение задачи мониторинга
 
 def check_dns(site):
-    tz = pytz.timezone("Europe/Moscow")
+    tz = pytz.timezone("Europe/Ulyanovsk")
     time = datetime.now(tz).strftime("%d/%m/%y %I:%M:%S")
     try:
         hostname = urlparse(site).hostname

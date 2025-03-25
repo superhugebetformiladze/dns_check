@@ -8,8 +8,9 @@
 </head>
 
 <body>
-    <canvas id="gradient-canvas"></canvas>
-
+    <!-- <canvas id="gradient-canvas"></canvas> -->
+     <div id="background"></div>
+0,
     <div class="container">
         <div id="controls" class="controls">
             <input type="number" id="interval" placeholder="Интервал проверки (сек)">
@@ -27,66 +28,121 @@
         let intervalInput = document.getElementById("interval");
         let autoScroll = true;
         let alertSound = new Audio("/static/audio/alert.mp3");
-
+        let backgroundDiv = document.getElementById("background");
+        
+        let unworkingMessages = []; // История "unworking" сообщений
+        let lastClearDate = new Date().toDateString(); // Дата последней очистки
+        
         function isAtBottom() {
             return output.scrollHeight - output.clientHeight <= output.scrollTop + 1;
         }
-
-        output.addEventListener("scroll", function() {
+        
+        output.addEventListener("scroll", function () {
             autoScroll = isAtBottom();
         });
-
-        ws.onopen = function() {
+        
+        ws.onopen = function () {
             console.log("WebSocket соединение установлено.");
             ws.send(JSON.stringify({ type: "get_interval" })); // Запрашиваем текущий интервал
         };
-
-        ws.onmessage = function(event) {
+        
+        ws.onmessage = function (event) {
             let newData = JSON.parse(event.data);
-
+            
             if (newData.type === "interval_update") {
-                intervalInput.value = newData.interval; // Обновляем значение поля
+                intervalInput.value = newData.interval;
                 return;
             }
-
+        
+            let currentDate = new Date().toDateString();
+        
+            // Очищаем историю раз в день
+            if (currentDate !== lastClearDate) {
+                lastClearDate = currentDate;
+                unworkingMessages = [];
+                renderMessages();
+            }
+        
             newData.forEach(data => {
-                let site = data.site;
-                let info = data.info;
-                let time = data.time;
-                let status = data.status;
-
-                output.innerHTML += `
-                <div class="info-block">
-                    <div class="info-wrapper">
-                        <span class="info-bold">Сайт: </span>
-                        <span class="info">${site}</span>
-                    </div>
-                    <div class="info-wrapper">
-                        <span class="info-bold">Статус: </span>
-                        <span class="info">${info}</span>
-                    </div>
-                    <div class="info-wrapper">
-                        <span class="info-bold">Время: </span>
-                        <span class="info">${time}</span>
-                    </div>
-                </div>
-                `;
-
-                if (status.includes("unworking")) {
-                    alertSound.play();
+                let { site, info, time, status } = data;
+        
+                // Добавляем новое сообщение в вывод
+                addMessageToOutput(data);
+        
+                if (status === "unworking") {
+                    unworkingMessages.push(data); // Сохраняем "unworking" в историю
+                    alertSound.play(); // Проигрываем звук
                 }
-
-                if (autoScroll) {
-                    output.scrollTop = output.scrollHeight;
-                }
+        
+                updateBackground(status);
             });
+        
+            if (autoScroll) {
+                output.scrollTop = output.scrollHeight;
+            }
         };
-
+        
+        function updateBackground(status) {
+            if (status === "unworking") {
+                backgroundDiv.style.backgroundImage = "url('/static/images/unworking.png')";
+            } else {
+                backgroundDiv.style.backgroundImage = "url('/static/images/working.png')";
+            }
+        }
+        
+        function addMessageToOutput(data) {
+            let infoBlock = createInfoBlock(data);
+            output.appendChild(infoBlock);
+        
+            if (autoScroll) {
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+        
+        function renderMessages() {
+            output.innerHTML = ""; // Очищаем DOM перед обновлением
+        
+            let fragment = document.createDocumentFragment();
+        
+            // Добавляем всю историю "unworking"
+            unworkingMessages.forEach(data => {
+                fragment.appendChild(createInfoBlock(data));
+            });
+        
+            output.appendChild(fragment);
+        
+            if (autoScroll) {
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+        
+        function createInfoBlock(data) {
+            let infoBlock = document.createElement("div");
+            infoBlock.classList.add("info-block");
+        
+            infoBlock.innerHTML = `
+                <div class="info-wrapper">
+                    <span class="info-bold">Сайт: </span>
+                    <span class="info">${data.site}</span>
+                </div>
+                <div class="info-wrapper">
+                    <span class="info-bold">Статус: </span>
+                    <span class="info">${data.info}</span>
+                </div>
+                <div class="info-wrapper">
+                    <span class="info-bold">Время: </span>
+                    <span class="info">${data.time}</span>
+                </div>
+            `;
+        
+            return infoBlock;
+        }
+        
         function updateInterval() {
             let newInterval = parseInt(intervalInput.value);
             ws.send(JSON.stringify({ type: "update_interval", interval: newInterval }));
         }
+        
     </script>
-    <script src="/static/gradient.js"></script>
 </body>
 </html>
